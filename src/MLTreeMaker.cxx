@@ -249,8 +249,6 @@ StatusCode MLTreeMaker::initialize() {
     m_eventTree->Branch("truthTauEtaVisCharged",     &m_truthTauEtaVisCharged);
     m_eventTree->Branch("truthTauPhiVisCharged",     &m_truthTauPhiVisCharged);
     m_eventTree->Branch("truthTauMVisCharged",       &m_truthTauMVisCharged);
-
-
     }
 
  
@@ -392,7 +390,7 @@ StatusCode MLTreeMaker::initialize() {
 	}
       }
     }
-  }
+  }// closes if (m_doEventTree) 
 
   if (m_doClusterTree) {
 
@@ -819,7 +817,8 @@ StatusCode MLTreeMaker::execute() {
       xAOD::TruthParticleContainer* xTruthTauContainer = m_tauTruthMatchingTool->getTruthTauContainer();
       xAOD::TruthParticleAuxContainer* xTruthTauAuxContainer = m_tauTruthMatchingTool->getTruthTauAuxContainer();
  
-      ATH_MSG_INFO("Start doTaus");
+      // ATH_MSG_INFO("Start doTaus");
+      // Loop over truth taus and fill variables
       for (const xAOD::TruthParticle* truthTau: *xTruthTauContainer){
 
          m_truthTauPdgId.push_back(truthTau->pdgId());
@@ -846,9 +845,7 @@ StatusCode MLTreeMaker::execute() {
 
 
       }
-
-
- }
+    }
     if (m_doTracking) {
 
       // Tracks
@@ -1149,9 +1146,9 @@ StatusCode MLTreeMaker::execute() {
 	  v_E.push_back(jet_p4.E());
 	}
       }
-    }
+    }// closes if(m_doJets) 
 
-  }
+  } // closes if(m_doEventTree)
 
   // Calo clusters
 //  const xAOD::CaloClusterContainer* clusterContainer = 0; 
@@ -1186,7 +1183,7 @@ StatusCode MLTreeMaker::execute() {
   //loop over clusters in order of their energies
   //clusters failing E or eta cut are not included in loop
 
-  // christina edit 
+  // Comment everything above, loop over taus and then loop over clusters of its tau 
   const xAOD::TauJetContainer* tau_cont = nullptr;
   CHECK(evtStore()->retrieve(tau_cont, "TauJets"));
   for(const xAOD::TauJet* recoTau: *tau_cont){
@@ -1463,11 +1460,11 @@ StatusCode MLTreeMaker::execute() {
       //    m_duplicate_TileBar0 == 0 && m_duplicate_TileBar1 == 0 && m_duplicate_TileBar2 == 0) {
       m_clusterTree->Fill();
       //}
-     }//loop clusters
-    }// loop taus
+     }// end for loop over cells
+    }// closes if(m_doClusterTree)
 
-    }
-  }
+   }// end for loop over clusters
+  }// end for loop over taus
   if (m_doEventTree) m_eventTree->Fill();
  // m_clusterCount+=m_nCluster;
   return StatusCode::SUCCESS;
