@@ -261,6 +261,25 @@ class MLTreeMaker: public ::AthHistogramAlgorithm {
     std::vector<double> m_truthTauPhiVisCharged;
     std::vector<double> m_truthTauMVisCharged;
 
+    std::vector<int> m_truthTauDecayMode;
+    std::vector<int> m_tauDecayMode;
+
+    std::vector<double> m_tauPt;
+    std::vector<double> m_tauEta;
+    std::vector<double> m_tauPhi;
+    std::vector<double> m_tauE;
+
+
+
+    std::vector<double> m_tauPtJetSeed;
+    std::vector<double> m_tauPtDetectorAxis;
+    std::vector<double> m_tauPtIntermediateAxis;
+    std::vector<double> m_tauPtTauEnergyScale;
+    std::vector<double> m_tauPtTauEtaCalib;
+    std::vector<double> m_tauPtPanTauCellBasedProto;
+    std::vector<double> m_tauPtPanTauCellBased;
+    std::vector<double> m_tauPtTrigCaloOnly;
+    std::vector<double> m_tauPtFinalCalib;
 
 
 

@@ -142,7 +142,7 @@ StatusCode MLTreeMaker::initialize() {
   ATH_CHECK(m_tauTruthMatchingTool.retrieve());
   m_tauTruthMatchingTool->msg().setLevel( MSG::INFO );
   ATH_CHECK(m_tauTruthMatchingTool->initialize());
-  //ATH_CHECK(m_tauTruthMatchingTool->setProperty("WriteTruthTaus",true)); 
+  ATH_CHECK(m_tauTruthMatchingTool->setProperty("WriteTruthTaus",true)); 
   ATH_CHECK(m_tauTruthMatchingTool->setProperty("WriteVisibleChargedFourMomentum",true));
   ATH_CHECK(m_tauTruthMatchingTool->setProperty("WriteVisibleNeutralFourMomentum",true)); 
 
@@ -249,6 +249,27 @@ StatusCode MLTreeMaker::initialize() {
     m_eventTree->Branch("truthTauEtaVisCharged",     &m_truthTauEtaVisCharged);
     m_eventTree->Branch("truthTauPhiVisCharged",     &m_truthTauPhiVisCharged);
     m_eventTree->Branch("truthTauMVisCharged",       &m_truthTauMVisCharged);
+   
+    m_eventTree->Branch("truthTauDecayMode", &m_truthTauDecayMode); 
+    m_eventTree->Branch("tauDecayMode", &m_tauDecayMode);
+
+
+    m_eventTree->Branch("tauPt",  &m_tauPt);
+    m_eventTree->Branch("tauEta", &m_tauEta);
+    m_eventTree->Branch("tauPhi", &m_tauPhi);
+    m_eventTree->Branch("tauE",   &m_tauE);
+
+
+    m_eventTree->Branch("tauPtJetSeed",  &m_tauPtJetSeed);
+    m_eventTree->Branch("tauPtDetectorAxis",  &m_tauPtDetectorAxis);
+    m_eventTree->Branch("tauPtIntermediateAxis",  &m_tauPtIntermediateAxis);
+    m_eventTree->Branch("tauPtTauEnergyScale",  &m_tauPtTauEnergyScale);
+    m_eventTree->Branch("tauPtTauEtaCalib",    &m_tauPtTauEtaCalib);
+    m_eventTree->Branch("tauPtPanTauCellBasedProto", &m_tauPtPanTauCellBasedProto);
+    m_eventTree->Branch("tauPtPanTauCellBased", &m_tauPtPanTauCellBased);
+    m_eventTree->Branch("tauPtTrigCaloOnly", &m_tauPtTrigCaloOnly);
+    m_eventTree->Branch("tauPtFinalCalib", &m_tauPtFinalCalib);
+
     }
 
  
@@ -417,9 +438,9 @@ StatusCode MLTreeMaker::initialize() {
 /*
     if(m_doClusterMoments)
     {
-      m_clusterTree->Branch("cluster_ENG_CALIB_TOT",     &m_fCluster_ENG_CALIB_TOT,      "cluster_ENG_CALIB_TOT/F");
-      m_clusterTree->Branch("cluster_ENG_CALIB_OUT_T",   &m_fCluster_ENG_CALIB_OUT_T,    "cluster_ENG_CALIB_OUT_T/F");
-      m_clusterTree->Branch("cluster_ENG_CALIB_DEAD_TOT",&m_fCluster_ENG_CALIB_DEAD_TOT, "cluster_ENG_CALIB_DEAD_TOT/F");
+//      m_clusterTree->Branch("cluster_ENG_CALIB_TOT",     &m_fCluster_ENG_CALIB_TOT,      "cluster_ENG_CALIB_TOT/F");
+//      m_clusterTree->Branch("cluster_ENG_CALIB_OUT_T",   &m_fCluster_ENG_CALIB_OUT_T,    "cluster_ENG_CALIB_OUT_T/F");
+//      m_clusterTree->Branch("cluster_ENG_CALIB_DEAD_TOT",&m_fCluster_ENG_CALIB_DEAD_TOT, "cluster_ENG_CALIB_DEAD_TOT/F");
       m_clusterTree->Branch("cluster_EM_PROBABILITY",   &m_fCluster_EM_PROBABILITY,   "cluster_EM_PROBABILITY/F");
       m_clusterTree->Branch("cluster_HAD_WEIGHT", &m_fCluster_HAD_WEIGHT,  "cluster_HAD_WEIGHT/F");
       m_clusterTree->Branch("cluster_OOC_WEIGHT", &m_fCluster_OOC_WEIGHT,  "cluster_OOC_WEIGHT/F");
@@ -428,7 +449,7 @@ StatusCode MLTreeMaker::initialize() {
       m_clusterTree->Branch("cluster_FIRST_ENG_DENS", &m_fCluster_FIRST_ENG_DENS,  "cluster_FIRST_ENG_DENS/F");
       m_clusterTree->Branch("cluster_CENTER_LAMBDA", &m_fCluster_CENTER_LAMBDA,  "cluster_CENTER_LAMBDA/F");
       m_clusterTree->Branch("cluster_ISOLATION", &m_fCluster_ISOLATION,  "cluster_ISOLATION/F");
-      m_clusterTree->Branch("cluster_ENERGY_DigiHSTruth", &m_fCluster_ENERGY_DigiHSTruth,  "cluster_ENERGY_DigiHSTruth/F");
+ //     m_clusterTree->Branch("cluster_ENERGY_DigiHSTruth", &m_fCluster_ENERGY_DigiHSTruth,  "cluster_ENERGY_DigiHSTruth/F");
     }
 */
     m_clusterTree->Branch("cluster_cell_dR_min",    &m_fCluster_cell_dR_min,   "cluster_cell_dR_min/F");
@@ -813,6 +834,7 @@ StatusCode MLTreeMaker::execute() {
       m_truthTauPhiVisCharged.clear();
       m_truthTauMVisCharged.clear();
       
+      m_truthTauDecayMode.clear();
       // Get TruthTaus from the TruthParticleContainer using the tauTruthMatchingTool
       xAOD::TruthParticleContainer* xTruthTauContainer = m_tauTruthMatchingTool->getTruthTauContainer();
       xAOD::TruthParticleAuxContainer* xTruthTauAuxContainer = m_tauTruthMatchingTool->getTruthTauAuxContainer();
@@ -822,7 +844,9 @@ StatusCode MLTreeMaker::execute() {
       for (const xAOD::TruthParticle* truthTau: *xTruthTauContainer){
 
          m_truthTauPdgId.push_back(truthTau->pdgId());
- 
+         
+         m_truthTauDecayMode.push_back(m_tauTruthMatchingTool->getDecayMode(*truthTau));    
+
          m_truthTauEta.push_back(truthTau->eta());
          m_truthTauPhi.push_back(truthTau->phi());
          m_truthTauE.push_back(truthTau->e()*1e-3);
@@ -842,10 +866,73 @@ StatusCode MLTreeMaker::execute() {
          m_truthTauEtaVisCharged.push_back(truthTau->auxdata<double>("eta_vis_charged"));
          m_truthTauPhiVisCharged.push_back(truthTau->auxdata<double>("phi_vis_charged"));
          m_truthTauMVisCharged.push_back(truthTau->auxdata<double>("m_vis_charged"));
-
-
       }
+
+
+      // Clear reco-level variables 
+      m_tauDecayMode.clear();
+      m_tauPt.clear();
+      m_tauEta.clear();
+      m_tauPhi.clear();
+      m_tauE.clear();
+
+      m_tauPtJetSeed.clear();
+      m_tauPtDetectorAxis.clear();
+      m_tauPtIntermediateAxis.clear();
+      m_tauPtTauEnergyScale.clear();
+      m_tauPtTauEtaCalib.clear();
+      m_tauPtPanTauCellBasedProto.clear();
+      m_tauPtPanTauCellBased.clear();
+      m_tauPtTrigCaloOnly.clear();
+      m_tauPtFinalCalib.clear();
+
+
+
+
+      
+      const xAOD::TauJetContainer* tau_cont = nullptr;
+      CHECK(evtStore()->retrieve(tau_cont, "TauJets"));
+      for(const xAOD::TauJet* recoTau: *tau_cont)
+      {    
+       bool pass_selection = false;
+       const auto truthTau = m_tauTruthMatchingTool->applyTruthMatch(*recoTau);
+       
+       if(recoTau->auxdata<char>("IsTruthMatched")&& truthTau)
+       {
+        
+        bool isHadronic = truthTau->auxdata<char>("IsHadronicTau");
+        if (isHadronic) { pass_selection = true;}
+       }
+       
+       if(pass_selection){ 
+
+       // ATH_MSG_INFO("only truth matched taus"); 
+     
+    
+       int decayMode = xAOD::TauJetParameters::DecayMode::Mode_Error;
+       recoTau->panTauDetail(xAOD::TauJetParameters::PanTauDetails::PanTau_DecayMode, decayMode);       
+       m_tauDecayMode.push_back(recoTau->auxdata<int>("PanTau_DecayMode")); 
+     
+       m_tauPt.push_back(recoTau->pt());
+       m_tauEta.push_back(recoTau->eta());
+       m_tauPhi.push_back(recoTau->phi());
+       m_tauE.push_back(recoTau->e()); 
+
+       // pt of tau at different calibration stages
+       m_tauPtJetSeed.push_back(recoTau->ptJetSeed());
+       m_tauPtDetectorAxis.push_back(recoTau->ptDetectorAxis());
+       m_tauPtIntermediateAxis.push_back(recoTau->ptIntermediateAxis());
+       m_tauPtTauEnergyScale.push_back(recoTau->ptTauEnergyScale());
+       m_tauPtTauEtaCalib.push_back(recoTau->ptTauEtaCalib());
+       m_tauPtPanTauCellBasedProto.push_back(recoTau->ptPanTauCellBasedProto());
+       m_tauPtPanTauCellBased.push_back(recoTau->ptPanTauCellBased());
+       m_tauPtTrigCaloOnly.push_back(recoTau->ptTrigCaloOnly());
+       m_tauPtFinalCalib.push_back(recoTau->ptFinalCalib());
+
+       } // end if pass selection
+      } // end for loop 
     }
+
     if (m_doTracking) {
 
       // Tracks
@@ -1188,10 +1275,23 @@ StatusCode MLTreeMaker::execute() {
   CHECK(evtStore()->retrieve(tau_cont, "TauJets"));
   for(const xAOD::TauJet* recoTau: *tau_cont){
 
+  bool pass_selection = false;
+  const auto truthTau = m_tauTruthMatchingTool->applyTruthMatch(*recoTau);
+
+  if(recoTau->auxdata<char>("IsTruthMatched")&& truthTau)
+  {
+
+    bool isHadronic = truthTau->auxdata<char>("IsHadronicTau");
+    if (isHadronic) { pass_selection = true;}
+  }
+  // so that we only have truth-matched reco-taus
+  if(pass_selection){
+
   //unsigned int jCluster=0;
 
   //for(auto mpair : clusterRanks)
-  
+   
+
    for (unsigned int jCluster=0; jCluster< recoTau->nClusters(); jCluster++){
    {
     //auto calibratedCluster=(*clusterContainer)[mpair.second];
@@ -1201,15 +1301,17 @@ StatusCode MLTreeMaker::execute() {
     const xAOD::IParticle* particle  = recoTau->cluster(jCluster);
     const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>(particle);
 
+
     float clusterE = cluster->e()/1e3;
     float clusterPt = cluster->pt()/1e3;
     float clusterEta = cluster->eta();
     float clusterPhi = cluster->phi();
+   
 /*
     //ARA: adding code to retreive EM_PROBABILITY
-    double cluster_ENG_CALIB_TOT = 0;
-    double cluster_ENG_CALIB_OUT_T = 0;
-    double cluster_ENG_CALIB_DEAD_TOT = 0;
+//    double cluster_ENG_CALIB_TOT = 0;
+//    double cluster_ENG_CALIB_OUT_T = 0;
+//    double cluster_ENG_CALIB_DEAD_TOT = 0;
 
     double cluster_EM_PROBABILITY = 0;
     double cluster_HAD_WEIGHT = 0;
@@ -1219,7 +1321,7 @@ StatusCode MLTreeMaker::execute() {
     double cluster_FIRST_ENG_DENS = 0;
     double cluster_CENTER_LAMBDA = 0;
     double cluster_ISOLATION = 0;
-    double cluster_ENERGY_DigiHSTruth = 0;
+ //   double cluster_ENERGY_DigiHSTruth = 0;
 
     if(m_doClusterMoments)
     {
@@ -1242,10 +1344,10 @@ StatusCode MLTreeMaker::execute() {
       if( !calibratedCluster->retrieveMoment( xAOD::CaloCluster::HAD_WEIGHT, cluster_HAD_WEIGHT) ) cluster_HAD_WEIGHT=-1.;
       if( !calibratedCluster->retrieveMoment( xAOD::CaloCluster::OOC_WEIGHT, cluster_OOC_WEIGHT) ) cluster_OOC_WEIGHT=-1.;
       if( !calibratedCluster->retrieveMoment( xAOD::CaloCluster::DM_WEIGHT, cluster_DM_WEIGHT) ) cluster_DM_WEIGHT=-1.;
-      if( !calibratedCluster->retrieveMoment( xAOD::CaloCluster::ENERGY_DigiHSTruth, cluster_ENERGY_DigiHSTruth) ) cluster_ENERGY_DigiHSTruth=-999.;
+  //    if( !calibratedCluster->retrieveMoment( xAOD::CaloCluster::ENERGY_DigiHSTruth, cluster_ENERGY_DigiHSTruth) ) cluster_ENERGY_DigiHSTruth=-999.;
     }
-*/
 
+*/
 
 
     if (m_doEventTree) {
@@ -1427,12 +1529,12 @@ StatusCode MLTreeMaker::execute() {
       m_fCluster_nCells = cell_i;
       m_fCluster_sumCellE = sumCellE_i;
 
-
-  /*    if(m_doClusterMoments)
+/*
+      if(m_doClusterMoments)
       {
-	m_fCluster_ENG_CALIB_TOT=cluster_ENG_CALIB_TOT;
-	m_fCluster_ENG_CALIB_OUT_T=cluster_ENG_CALIB_OUT_T;
-	m_fCluster_ENG_CALIB_DEAD_TOT=cluster_ENG_CALIB_DEAD_TOT;
+//	m_fCluster_ENG_CALIB_TOT=cluster_ENG_CALIB_TOT;
+//	m_fCluster_ENG_CALIB_OUT_T=cluster_ENG_CALIB_OUT_T;
+//	m_fCluster_ENG_CALIB_DEAD_TOT=cluster_ENG_CALIB_DEAD_TOT;
 	
 	m_fCluster_EM_PROBABILITY = cluster_EM_PROBABILITY;
 	m_fCluster_HAD_WEIGHT=cluster_HAD_WEIGHT;
@@ -1442,7 +1544,7 @@ StatusCode MLTreeMaker::execute() {
 	m_fCluster_FIRST_ENG_DENS=cluster_FIRST_ENG_DENS;
 	m_fCluster_CENTER_LAMBDA=cluster_CENTER_LAMBDA;
 	m_fCluster_ISOLATION=cluster_ISOLATION;
-	m_fCluster_ENERGY_DigiHSTruth=cluster_ENERGY_DigiHSTruth;
+//	m_fCluster_ENERGY_DigiHSTruth=cluster_ENERGY_DigiHSTruth;
       }
 */
       m_fCluster_cell_dR_min = dR_min;
@@ -1464,6 +1566,7 @@ StatusCode MLTreeMaker::execute() {
     }// closes if(m_doClusterTree)
 
    }// end for loop over clusters
+   }// end if(pass_selection)
   }// end for loop over taus
   if (m_doEventTree) m_eventTree->Fill();
  // m_clusterCount+=m_nCluster;
