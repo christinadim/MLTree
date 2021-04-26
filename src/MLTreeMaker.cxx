@@ -1369,7 +1369,28 @@ StatusCode MLTreeMaker::execute() {
     float clusterPt = cluster->pt()/1e3;
     float clusterEta = cluster->eta();
     float clusterPhi = cluster->phi();
-   
+  
+    
+    // sister cluster
+    auto sisterCluster = cluster->getSisterCluster(); 
+
+    ATH_MSG_INFO("clusterE= "<< cluster->e()<<" , clusterCalE= "<<cluster->calE()<<" , clusterRawE= "<<cluster->rawE()<<" ,sisterClusterE= "<<sisterCluster->e()<<" .");  
+    ATH_MSG_INFO("clusterPhi= "<< cluster->phi()<<" , clusterCalPhi= "<<cluster->calPhi()<<" , clusterRawPhi= "<<cluster->rawPhi()<<" ,sisterClusterPhi= "<<sisterCluster->phi()<<" .");
+     ATH_MSG_INFO("clusterEta= "<< cluster->eta()<<" , clusterCalEta= "<<cluster->calEta()<<" , clusterRawEta= "<<cluster->rawEta()<<" ,sisterClusterEta= "<<sisterCluster->eta()<<" .");
+/*
+    if(m_doUncalibratedClusters) {
+      if(sisterCluster) cluster=sisterCluster;
+      else 
+      {
+        ATH_MSG_ERROR("Sister cluster returns nullptr");
+        return StatusCode::FAILURE;
+      }
+    }
+
+   // ATH_MSG_INFO("clusterE= "<< cluster->e()<<" , clusterCalE= "<<cluster->calE()<<" , clusterRawE= "<<cluster->rawE()<<" ,sisterClusterE= "<<sisterCluster->e()<<" .");
+*/
+
+ 
 /*
     //ARA: adding code to retreive EM_PROBABILITY
 //    double cluster_ENG_CALIB_TOT = 0;
@@ -1471,6 +1492,8 @@ StatusCode MLTreeMaker::execute() {
       sumCellE_unweighted += cell->e()*1e-3;
       sumWeights += it_cell.weight();
       nCells++;
+   
+    //  ATH_MSG_INFO(sumCellE <<" , "<< sumCellE_unweighted);
     }
 
     if (fillCellValidation && m_doEventTree) {
@@ -1486,6 +1509,7 @@ StatusCode MLTreeMaker::execute() {
       m_cluster_cell_centerCellEta.push_back(centerCellEta);
       m_cluster_cell_centerCellPhi.push_back(centerCellPhi);
       m_cluster_cell_centerCellLayer.push_back((int)centerCellLayer);
+    
     }
 
     if (m_doClusterTree) {
@@ -1530,6 +1554,7 @@ StatusCode MLTreeMaker::execute() {
         const CaloCell* cell = (*it_cell);
         if (!cell->caloDDE()) continue;
 
+        
         double dEta = cell->eta() - centerCellEta;
 	double dPhi = TVector2::Phi_mpi_pi(cell->phi() - centerCellPhi);
         float cellE = cell->e()*(it_cell.weight())/1e3;
@@ -1577,7 +1602,7 @@ StatusCode MLTreeMaker::execute() {
       			   << iEta << "/"<< nEta << ", "
       			   << iPhi << "/"<< nPhi << ", "
       			   << samplingIndex << "\t" << cellLayer);
-      
+       ATH_MSG_INFO(cell_i);
       }
 
       m_fClusterIndex = jCluster;
