@@ -114,6 +114,7 @@ topSequence += MLTreeMaker(name = "MLTreeMaker",
                            OnlyStableTruthParticles = True,
                            Jets = True,
                            Taus = True,
+                           CellCorrection = True,
                            JetContainers = ["AntiKt4EMTopoJets","AntiKt4LCTopoJets","AntiKt4TruthJets"],
                            OutputLevel = INFO)
 topSequence.MLTreeMaker.TrackSelectionTool.CutLevel = "TightPrimary"

@@ -41,7 +41,7 @@
 #include "CaloUtils/CaloClusterSignalState.h"
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
 #include "xAODCaloEvent/CaloClusterChangeSignalState.h"
-
+#include "CaloUtils/CaloVertexedCell.h"
 // Other xAOD incudes
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -88,7 +88,8 @@ MLTreeMaker::MLTreeMaker( const std::string& name, ISvcLocator* pSvcLocator ) :
   m_clusterEtaAbs_max(0.7),
   m_cellE_thres(0.005),  // 5 MeV threshold
   m_clusterCount(0),
-  m_trkSelectionTool("InDet::InDetTrackSelectionTool/TrackSelectionTool", this)  
+  m_trkSelectionTool("InDet::InDetTrackSelectionTool/TrackSelectionTool", this),
+  m_doCellCorrection(false)  
 {
   declareProperty("ClusterEmin", m_clusterE_min);
   declareProperty("ClusterEmax", m_clusterE_max);
@@ -115,6 +116,7 @@ MLTreeMaker::MLTreeMaker( const std::string& name, ISvcLocator* pSvcLocator ) :
   declareProperty("Extrapolator", m_extrapolator);
   declareProperty("TheTrackExtrapolatorTool", m_theTrackExtrapolatorTool);
   declareProperty("TrackSelectionTool", m_trkSelectionTool);
+  declareProperty("CellCorrection", m_doCellCorrection);
 }
 
 MLTreeMaker::~MLTreeMaker() {}
@@ -1496,6 +1498,15 @@ StatusCode MLTreeMaker::execute() {
     float sumCellE_unweighted=0;
     bool fillCellValidation = false;
 
+
+    double cellEta, cellPhi, cellET, cellEnergy;
+    // use tau vertex to correct cell position
+    bool applyCellCorrection = false;
+    if(m_doCellCorrection && recoTau->vertexLink()){
+        applyCellCorrection = true;
+    }
+
+
     // Figure out which cell is at the center if the cluster and fill some validation plots
     CaloClusterCellLink::const_iterator it_cell = cluster->cell_begin();
     CaloClusterCellLink::const_iterator it_cell_end = cluster->cell_end();
@@ -1503,8 +1514,27 @@ StatusCode MLTreeMaker::execute() {
       const CaloCell* cell = (*it_cell);
       if (!cell->caloDDE()) continue;
 
-      float dEta = cell->eta() - clusterEta;
-      float dPhi = cell->phi() - clusterPhi;
+
+     // ATH_MSG_INFO("before cell correction: phi= "<<cell->phi()<<" , eta= "<<cell->eta()<<" ,energy= " << cell->e() << ", et= " <<cell->et() );
+       
+      if(applyCellCorrection){
+        CaloVertexedCell vxCell (*cell, (*recoTau->vertexLink())->position());
+          cellPhi = vxCell.phi();
+          cellEta = vxCell.eta();
+          cellET = vxCell.et();
+          cellEnergy = vxCell.e();
+      }
+      else {
+          cellPhi = cell->phi();
+          cellEta = cell->eta();
+          cellET = cell->et();
+          cellEnergy = cell->e(); 
+      }
+    //ATH_MSG_INFO("after cell correction: phi= "<<cellPhi<<" , eta= "<<cellEta<<" ,energy= " << cellEnergy << ", et= " <<cellET );
+    //ATH_MSG_INFO(cell->energy()<<" and "<<cell->e());
+      
+      float dEta = cellEta - clusterEta;
+      float dPhi = cellPhi - clusterPhi;
       // if (std::abs(dPhi) > TMath::Pi()) dPhi = 2*TMath::Pi()-std::abs(dPhi);
       if (m_doEventTree) {
         m_cluster_cell_dEta.push_back(dEta);
@@ -1516,8 +1546,8 @@ StatusCode MLTreeMaker::execute() {
         dR_min = dR_tmp;
         dEta_min = dEta;
         dPhi_min = dPhi;
-        centerCellEta = cell->eta();
-        centerCellPhi = cell->phi();
+        centerCellEta = cellEta;
+        centerCellPhi = cellPhi;
         centerCellLayer = cell->caloDDE()->getSampling();
       };
       if (dR_max < dR_tmp) {
@@ -1527,8 +1557,8 @@ StatusCode MLTreeMaker::execute() {
       };
 
       fillCellValidation = true;
-      sumCellE += cell->e()*(it_cell.weight())/1e3;
-      sumCellE_unweighted += cell->e()*1e-3;
+      sumCellE += cellEnergy*(it_cell.weight())/1e3;
+      sumCellE_unweighted += cellEnergy*1e-3;
       sumWeights += it_cell.weight();
       nCells++;
    
@@ -1585,18 +1615,33 @@ StatusCode MLTreeMaker::execute() {
       double window_phi=0.19634954-reg;
       it_cell = cluster->cell_begin();
       it_cell_end = cluster->cell_end();
-
+     
       int cell_i = 0;
       float sumCellE_i = 0.;
       for(; it_cell != it_cell_end; it_cell++)
       {
         const CaloCell* cell = (*it_cell);
         if (!cell->caloDDE()) continue;
+      
+        double dEta_before = cell->eta() - centerCellEta;
 
-        
-        double dEta = cell->eta() - centerCellEta;
-	double dPhi = TVector2::Phi_mpi_pi(cell->phi() - centerCellPhi);
-        float cellE = cell->e()*(it_cell.weight())/1e3;
+        if(applyCellCorrection){
+        CaloVertexedCell vxCell (*cell, (*recoTau->vertexLink())->position());
+          cellPhi = vxCell.phi();
+          cellEta = vxCell.eta();
+          cellET = vxCell.et();
+          cellEnergy = vxCell.e();
+        }
+        else {
+          cellPhi = cell->phi();
+          cellEta = cell->eta();
+          cellET = cell->et();
+          cellEnergy = cell->e();
+        }
+
+        double dEta = cellEta - centerCellEta;  
+        double dPhi = TVector2::Phi_mpi_pi(cellPhi - centerCellPhi);
+        float cellE = cellEnergy*(it_cell.weight())/1e3;
         float cellE_norm = cellE/clusterE;
 
         // noise rejection
@@ -1641,7 +1686,7 @@ StatusCode MLTreeMaker::execute() {
       			   << iEta << "/"<< nEta << ", "
       			   << iPhi << "/"<< nPhi << ", "
       			   << samplingIndex << "\t" << cellLayer);
-       ATH_MSG_INFO(cell_i);
+      // ATH_MSG_INFO(cell_i);
       }
 
       m_fClusterIndex = jCluster;

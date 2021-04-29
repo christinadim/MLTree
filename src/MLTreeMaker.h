@@ -74,6 +74,7 @@ class MLTreeMaker: public ::AthHistogramAlgorithm {
     Trk::TrackParametersIdHelper* m_trackParametersIdHelper;
     ToolHandle<ICaloSurfaceHelper> m_surfaceHelper;
     const TileTBID* m_tileTBID; 
+    bool m_doCellCorrection;
 
     // TauTruthMatchingTool
     ToolHandle<TauAnalysisTools::TauTruthMatchingTool> m_tauTruthMatchingTool;
