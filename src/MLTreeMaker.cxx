@@ -283,7 +283,12 @@ StatusCode MLTreeMaker::initialize() {
     m_eventTree->Branch("tauTruthEtaVisNeutral", &m_tauTruthEtaVisNeutral);
     m_eventTree->Branch("tauTruthPtVisNeutral", &m_tauTruthPtVisNeutral);
     m_eventTree->Branch("tauTruthPhiVisNeutral", &m_tauTruthPhiVisNeutral);
-   }
+ 
+    m_eventTree->Branch("tauTruthMVisCharged", &m_tauTruthMVisCharged);
+    m_eventTree->Branch("tauTruthEtaVisCharged", &m_tauTruthEtaVisCharged);
+    m_eventTree->Branch("tauTruthPtVisCharged", &m_tauTruthPtVisCharged);
+    m_eventTree->Branch("tauTruthPhiVisCharged", &m_tauTruthPhiVisCharged);
+  }
 
  
     // Track variables
@@ -871,20 +876,20 @@ StatusCode MLTreeMaker::execute() {
          m_truthTauE.push_back(truthTau->e()*1e-3);
          m_truthTauPt.push_back(truthTau->pt()*1e-3);
 
-         m_truthTauPtVis.push_back(truthTau->auxdata<double>("pt_vis"));
+         m_truthTauPtVis.push_back(truthTau->auxdata<double>("pt_vis")/1e3);
          m_truthTauEtaVis.push_back(truthTau->auxdata<double>("eta_vis"));
          m_truthTauPhiVis.push_back(truthTau->auxdata<double>("phi_vis"));
-         m_truthTauMVis.push_back(truthTau->auxdata<double>("m_vis"));
+         m_truthTauMVis.push_back(truthTau->auxdata<double>("m_vis")/1e3);
 
-         m_truthTauPtVisNeutral.push_back(truthTau->auxdata<double>("pt_vis_neutral"));
+         m_truthTauPtVisNeutral.push_back(truthTau->auxdata<double>("pt_vis_neutral")/1e3);
          m_truthTauEtaVisNeutral.push_back(truthTau->auxdata<double>("eta_vis_neutral"));
          m_truthTauPhiVisNeutral.push_back(truthTau->auxdata<double>("phi_vis_neutral"));
-         m_truthTauMVisNeutral.push_back(truthTau->auxdata<double>("m_vis_neutral"));
+         m_truthTauMVisNeutral.push_back(truthTau->auxdata<double>("m_vis_neutral")/1e3);
 
-         m_truthTauPtVisCharged.push_back(truthTau->auxdata<double>("pt_vis_charged"));
+         m_truthTauPtVisCharged.push_back(truthTau->auxdata<double>("pt_vis_charged")/1e3);
          m_truthTauEtaVisCharged.push_back(truthTau->auxdata<double>("eta_vis_charged"));
          m_truthTauPhiVisCharged.push_back(truthTau->auxdata<double>("phi_vis_charged"));
-         m_truthTauMVisCharged.push_back(truthTau->auxdata<double>("m_vis_charged"));
+         m_truthTauMVisCharged.push_back(truthTau->auxdata<double>("m_vis_charged")/1e3);
       }
 
 
@@ -921,6 +926,11 @@ StatusCode MLTreeMaker::execute() {
       m_tauTruthEtaVisNeutral.clear();
       m_tauTruthMVisNeutral.clear();
 
+      m_tauTruthPtVisCharged.clear();
+      m_tauTruthPhiVisCharged.clear();
+      m_tauTruthEtaVisCharged.clear();
+      m_tauTruthMVisCharged.clear();
+     
 
       const xAOD::TauJetContainer* tau_cont = nullptr;
       CHECK(evtStore()->retrieve(tau_cont, "TauJets"));
@@ -945,27 +955,27 @@ StatusCode MLTreeMaker::execute() {
        recoTau->panTauDetail(xAOD::TauJetParameters::PanTauDetails::PanTau_DecayMode, decayMode);       
        m_tauDecayMode.push_back(recoTau->auxdata<int>("PanTau_DecayMode")); 
      
-       m_tauPt.push_back(recoTau->pt());
+       m_tauPt.push_back(recoTau->pt()/1e3);
        m_tauEta.push_back(recoTau->eta());
        m_tauPhi.push_back(recoTau->phi());
-       m_tauE.push_back(recoTau->e()); 
+       m_tauE.push_back(recoTau->e()/1e3); 
 
        // pt of tau at different calibration stages
-       m_tauPtJetSeed.push_back(recoTau->ptJetSeed());
-       m_tauPtDetectorAxis.push_back(recoTau->ptDetectorAxis());
-       m_tauPtIntermediateAxis.push_back(recoTau->ptIntermediateAxis());
-       m_tauPtTauEnergyScale.push_back(recoTau->ptTauEnergyScale());
-       m_tauPtTauEtaCalib.push_back(recoTau->ptTauEtaCalib());
-       m_tauPtPanTauCellBasedProto.push_back(recoTau->ptPanTauCellBasedProto());
-       m_tauPtPanTauCellBased.push_back(recoTau->ptPanTauCellBased());
-       m_tauPtTrigCaloOnly.push_back(recoTau->ptTrigCaloOnly());
-       m_tauPtFinalCalib.push_back(recoTau->ptFinalCalib());
+       m_tauPtJetSeed.push_back(recoTau->ptJetSeed()/1e3);
+       m_tauPtDetectorAxis.push_back(recoTau->ptDetectorAxis()/1e3);
+       m_tauPtIntermediateAxis.push_back(recoTau->ptIntermediateAxis()/1e3);
+       m_tauPtTauEnergyScale.push_back(recoTau->ptTauEnergyScale()/1e3);
+       m_tauPtTauEtaCalib.push_back(recoTau->ptTauEtaCalib()/1e3);
+       m_tauPtPanTauCellBasedProto.push_back(recoTau->ptPanTauCellBasedProto()/1e3);
+       m_tauPtPanTauCellBased.push_back(recoTau->ptPanTauCellBased()/1e3);
+       m_tauPtTrigCaloOnly.push_back(recoTau->ptTrigCaloOnly()/1e3);
+       m_tauPtFinalCalib.push_back(recoTau->ptFinalCalib()/1e3);
 
 
        // truth information for reco taus
 
       recoTau->auxdecor<double>("truthPtVis")=truthTau->auxdata<double>("pt_vis"); 
-      m_tauTruthPtVis.push_back(recoTau->auxdata<double>("truthPtVis"));
+      m_tauTruthPtVis.push_back(recoTau->auxdata<double>("truthPtVis")/1e3);
 
       recoTau->auxdecor<double>("truthEtaVis")=truthTau->auxdata<double>("eta_vis");
       m_tauTruthEtaVis.push_back(recoTau->auxdata<double>("truthEtaVis"));
@@ -974,7 +984,7 @@ StatusCode MLTreeMaker::execute() {
       m_tauTruthPhiVis.push_back(recoTau->auxdata<double>("truthPhiVis"));
 
       recoTau->auxdecor<double>("truthMVis")=truthTau->auxdata<double>("m_vis");
-      m_tauTruthMVis.push_back(recoTau->auxdata<double>("truthMVis"));
+      m_tauTruthMVis.push_back(recoTau->auxdata<double>("truthMVis")/1e3);
 
       recoTau->auxdecor<int>("truthCharge")= truthTau->charge();
       m_tauTruthCharge.push_back(recoTau->auxdecor<int>("truthCharge"));
@@ -987,7 +997,7 @@ StatusCode MLTreeMaker::execute() {
       
 
       recoTau->auxdecor<double>("truthPtVisNeutral") = truthTau->auxdata<double>("pt_vis_neutral");
-      m_tauTruthPtVisNeutral.push_back(recoTau->auxdecor<double>("truthPtVisNeutral"));
+      m_tauTruthPtVisNeutral.push_back(recoTau->auxdecor<double>("truthPtVisNeutral")/1e3);
 
       recoTau->auxdecor<double>("truthEtaVisNeutral") = truthTau->auxdata<double>("eta_vis_neutral");
       m_tauTruthEtaVisNeutral.push_back(recoTau->auxdecor<double>("truthEtaVisNeutral"));
@@ -996,7 +1006,22 @@ StatusCode MLTreeMaker::execute() {
       m_tauTruthPhiVisNeutral.push_back(recoTau->auxdecor<double>("truthPhiVisNeutral"));
 
       recoTau->auxdecor<double>("truthMVisNeutral") = truthTau->auxdata<double>("m_vis_neutral");
-      m_tauTruthMVisNeutral.push_back(recoTau->auxdecor<double>("truthMVisNeutral"));
+      m_tauTruthMVisNeutral.push_back(recoTau->auxdecor<double>("truthMVisNeutral")/1e3);
+
+      recoTau->auxdecor<double>("truthPtVisCharged") = truthTau->auxdata<double>("pt_vis_charged");
+      m_tauTruthPtVisCharged.push_back(recoTau->auxdecor<double>("truthPtVisCharged")/1e3);
+
+      recoTau->auxdecor<double>("truthEtaVisCharged") = truthTau->auxdata<double>("eta_vis_charged");
+      m_tauTruthEtaVisCharged.push_back(recoTau->auxdecor<double>("truthEtaVisCharged"));
+
+      recoTau->auxdecor<double>("truthPhiVisCharged") = truthTau->auxdata<double>("phi_vis_charged");
+      m_tauTruthPhiVisCharged.push_back(recoTau->auxdecor<double>("truthPhiVisCharged"));
+
+      recoTau->auxdecor<double>("truthMVisCharged") = truthTau->auxdata<double>("m_vis_charged");
+      m_tauTruthMVisCharged.push_back(recoTau->auxdecor<double>("truthMVisCharged")/1e3);
+
+
+
 
        } // end if pass selection
       } // end for loop 
