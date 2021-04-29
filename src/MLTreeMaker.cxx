@@ -375,6 +375,9 @@ StatusCode MLTreeMaker::initialize() {
     m_eventTree->Branch("clusterPt",              &m_clusterPt);
     m_eventTree->Branch("clusterEta",             &m_clusterEta);
     m_eventTree->Branch("clusterPhi",             &m_clusterPhi);
+    m_eventTree->Branch("clusterRawE",            &m_clusterRawE);
+    m_eventTree->Branch("clusterRawEta",          &m_clusterRawEta);
+    m_eventTree->Branch("clusterRawPhi",          &m_clusterRawPhi);
     m_eventTree->Branch("cluster_nCells",         &m_cluster_nCells);
     m_eventTree->Branch("cluster_sumCellE",       &m_cluster_sumCellE);
     m_eventTree->Branch("cluster_cell_dEta",      &m_cluster_cell_dEta);
@@ -639,6 +642,9 @@ StatusCode MLTreeMaker::execute() {
   m_clusterPt.clear();
   m_clusterEta.clear();
   m_clusterPhi.clear();
+  m_clusterRawE.clear();
+  m_clusterRawEta.clear();
+  m_clusterRawPhi.clear();
   m_cluster_nCells.clear();
   m_cluster_sumCellE.clear();
   m_cluster_cell_dEta.clear();
@@ -1369,15 +1375,18 @@ StatusCode MLTreeMaker::execute() {
     float clusterPt = cluster->pt()/1e3;
     float clusterEta = cluster->eta();
     float clusterPhi = cluster->phi();
-  
+
+    float clusterRawE = cluster->rawE()/1e3;
+    float clusterRawPhi = cluster->rawPhi();
+    float clusterRawEta = cluster->rawEta();  
     
     // sister cluster
     auto sisterCluster = cluster->getSisterCluster(); 
-
+/*
     ATH_MSG_INFO("clusterE= "<< cluster->e()<<" , clusterCalE= "<<cluster->calE()<<" , clusterRawE= "<<cluster->rawE()<<" ,sisterClusterE= "<<sisterCluster->e()<<" .");  
     ATH_MSG_INFO("clusterPhi= "<< cluster->phi()<<" , clusterCalPhi= "<<cluster->calPhi()<<" , clusterRawPhi= "<<cluster->rawPhi()<<" ,sisterClusterPhi= "<<sisterCluster->phi()<<" .");
      ATH_MSG_INFO("clusterEta= "<< cluster->eta()<<" , clusterCalEta= "<<cluster->calEta()<<" , clusterRawEta= "<<cluster->rawEta()<<" ,sisterClusterEta= "<<sisterCluster->eta()<<" .");
-/*
+
     if(m_doUncalibratedClusters) {
       if(sisterCluster) cluster=sisterCluster;
       else 
@@ -1439,6 +1448,9 @@ StatusCode MLTreeMaker::execute() {
       m_clusterPt.push_back(clusterPt);
       m_clusterEta.push_back(clusterEta);
       m_clusterPhi.push_back(clusterPhi);
+      m_clusterRawE.push_back(clusterRawE);
+      m_clusterRawEta.push_back(clusterRawEta);
+      m_clusterRawPhi.push_back(clusterRawPhi);
     }
 
     float dR_min = 1e8;
