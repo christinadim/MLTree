@@ -1025,7 +1025,7 @@ StatusCode MLTreeMaker::execute() {
 
        } // end if pass selection
       } // end for loop 
-    }
+    } // end if(m_doTaus)
 
     if (m_doTracking) {
 
@@ -1386,7 +1386,7 @@ StatusCode MLTreeMaker::execute() {
   //for(auto mpair : clusterRanks)
    
 
-   for (unsigned int jCluster=0; jCluster< recoTau->nClusters(); jCluster++){
+   for (unsigned int jCluster=0; jCluster< recoTau->nClusters(); jCluster++)
    {
     //auto calibratedCluster=(*clusterContainer)[mpair.second];
     //auto cluster=calibratedCluster;
@@ -1689,7 +1689,7 @@ StatusCode MLTreeMaker::execute() {
       //    m_duplicate_TileBar0 == 0 && m_duplicate_TileBar1 == 0 && m_duplicate_TileBar2 == 0) {
       m_clusterTree->Fill();
       //}
-     }// end for loop over cells
+    
     }// closes if(m_doClusterTree)
 
    }// end for loop over clusters
