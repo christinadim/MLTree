@@ -945,7 +945,8 @@ StatusCode MLTreeMaker::execute() {
        {
         
         bool isHadronic = truthTau->auxdata<char>("IsHadronicTau");
-        if (isHadronic) { pass_selection = true;}
+        // select only 1p0n for now
+        if (isHadronic && m_tauTruthMatchingTool->getDecayMode(*truthTau)==0) { pass_selection = true;}
        }
        
        if(pass_selection){ 
@@ -1378,7 +1379,8 @@ StatusCode MLTreeMaker::execute() {
   {
 
     bool isHadronic = truthTau->auxdata<char>("IsHadronicTau");
-    if (isHadronic) { pass_selection = true;}
+    // select only 1p0n to match ML4Pions NN setup
+    if (isHadronic && m_tauTruthMatchingTool->getDecayMode(*truthTau) == 0) { pass_selection = true;}
   }
   // so that we only have truth-matched reco-taus
   if(pass_selection){
@@ -1386,7 +1388,7 @@ StatusCode MLTreeMaker::execute() {
   //unsigned int jCluster=0;
 
   //for(auto mpair : clusterRanks)
-   
+
 
    for (unsigned int jCluster=0; jCluster< recoTau->nClusters(); jCluster++)
    {
