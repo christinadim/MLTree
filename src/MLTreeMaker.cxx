@@ -383,8 +383,8 @@ StatusCode MLTreeMaker::initialize() {
     m_eventTree->Branch("clusterEta",             &m_clusterEta);
     m_eventTree->Branch("clusterPhi",             &m_clusterPhi);
     m_eventTree->Branch("clusterRawE",            &m_clusterRawE);
-    m_eventTree->Branch("clusterRawEta",          &m_clusterRawEta);
-    m_eventTree->Branch("clusterRawPhi",          &m_clusterRawPhi);
+   // m_eventTree->Branch("clusterRawEta",          &m_clusterRawEta);
+   // m_eventTree->Branch("clusterRawPhi",          &m_clusterRawPhi);
     m_eventTree->Branch("cluster_nCells",         &m_cluster_nCells);
     m_eventTree->Branch("cluster_sumCellE",       &m_cluster_sumCellE);
     m_eventTree->Branch("cluster_cell_dEta",      &m_cluster_cell_dEta);
@@ -650,8 +650,8 @@ StatusCode MLTreeMaker::execute() {
   m_clusterEta.clear();
   m_clusterPhi.clear();
   m_clusterRawE.clear();
-  m_clusterRawEta.clear();
-  m_clusterRawPhi.clear();
+  //m_clusterRawEta.clear();
+  //m_clusterRawPhi.clear();
   m_cluster_nCells.clear();
   m_cluster_sumCellE.clear();
   m_cluster_cell_dEta.clear();
@@ -1406,10 +1406,21 @@ StatusCode MLTreeMaker::execute() {
     float clusterPhi = cluster->phi();
 
     float clusterRawE = cluster->rawE()/1e3;
-    float clusterRawPhi = cluster->rawPhi();
-    float clusterRawEta = cluster->rawEta();  
-    
+    // calPhi and calEta are very close to rawPhi and rawEta, no need to save both
+    //float clusterRawPhi = cluster->rawPhi();
+    //float clusterRawEta = cluster->rawEta();  
 
+
+    float dEta_tau_cluster = recoTau->eta() - clusterEta;
+    float dPhi_tau_cluster = recoTau->phi() - clusterPhi;
+    float dR_tau_cluster = sqrt(pow(dEta_tau_cluster,2) + pow(dPhi_tau_cluster,2));   
+
+    if(dR_tau_cluster > 0.2) continue;
+    else {
+     if(std::abs(clusterEta) > m_clusterEtaAbs_max) continue;
+    }    
+
+    //ATH_MSG_INFO(std::abs(clusterEta));
     // Checks related to sister cluster and cluster raw properties
     auto sisterCluster = cluster->getSisterCluster(); 
 /*
@@ -1480,8 +1491,8 @@ StatusCode MLTreeMaker::execute() {
       m_clusterEta.push_back(clusterEta);
       m_clusterPhi.push_back(clusterPhi);
       m_clusterRawE.push_back(clusterRawE);
-      m_clusterRawEta.push_back(clusterRawEta);
-      m_clusterRawPhi.push_back(clusterRawPhi);
+      //m_clusterRawEta.push_back(clusterRawEta);
+      //m_clusterRawPhi.push_back(clusterRawPhi);
     }
 
     float dR_min = 1e8;

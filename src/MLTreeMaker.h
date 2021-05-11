@@ -312,8 +312,8 @@ class MLTreeMaker: public ::AthHistogramAlgorithm {
     std::vector<float> m_clusterEta;
     std::vector<float> m_clusterPhi;
     std::vector<float> m_clusterRawE;
-    std::vector<float> m_clusterRawEta;
-    std::vector<float> m_clusterRawPhi;
+//    std::vector<float> m_clusterRawEta;
+//    std::vector<float> m_clusterRawPhi;
     std::vector<float> m_cluster_sumCellE;
     std::vector<float> m_cluster_cell_dEta;
     std::vector<float> m_cluster_cell_dPhi;
