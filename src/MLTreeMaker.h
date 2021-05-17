@@ -302,7 +302,17 @@ class MLTreeMaker: public ::AthHistogramAlgorithm {
     std::vector<double> m_tauTruthPtVisCharged;
     std::vector<double> m_tauTruthEtaVisCharged;
 
+    std::vector<double> m_ptCharged;
+    std::vector<double> m_etaCharged;
+    std::vector<double> m_phiCharged;
+    std::vector<double> m_mCharged;
+
+    std::vector<double> m_ptPi0;
+    std::vector<double> m_etaPi0;
+    std::vector<double> m_phiPi0;
+    std::vector<double> m_mPi0;
  
+    std::vector<int> m_nPi0s;
     // Clusters and cells 
     long m_clusterCount;
     int m_nCluster;

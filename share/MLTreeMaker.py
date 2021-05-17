@@ -6,8 +6,8 @@
 # @date     October 2016
 
 # Number of events
-#theApp.EvtMax = -1 # all events in dataset
-theApp.EvtMax = 100 # testing
+theApp.EvtMax = -1 # all events in dataset
+#theApp.EvtMax = 100 # testing
 import AthenaPoolCnvSvc.ReadAthenaPool
 
 # Input files for testing

@@ -290,6 +290,19 @@ StatusCode MLTreeMaker::initialize() {
     m_eventTree->Branch("tauTruthEtaVisCharged", &m_tauTruthEtaVisCharged);
     m_eventTree->Branch("tauTruthPtVisCharged", &m_tauTruthPtVisCharged);
     m_eventTree->Branch("tauTruthPhiVisCharged", &m_tauTruthPhiVisCharged);
+  
+    m_eventTree->Branch("ptPiCharged", &m_ptCharged);
+    m_eventTree->Branch("etaPiCharged", &m_etaCharged);
+    m_eventTree->Branch("phiPiCharged", &m_phiCharged);
+    m_eventTree->Branch("mPiCharged", &m_mCharged);
+
+    m_eventTree->Branch("ptPi0", &m_ptPi0);
+    m_eventTree->Branch("etaPi0", &m_etaPi0);
+    m_eventTree->Branch("phiPi0", &m_phiPi0);
+    m_eventTree->Branch("mPi0", &m_mPi0);
+ 
+    m_eventTree->Branch("nPi0s", &m_nPi0s);
+
   }
 
  
@@ -933,6 +946,17 @@ StatusCode MLTreeMaker::execute() {
       m_tauTruthEtaVisCharged.clear();
       m_tauTruthMVisCharged.clear();
      
+      m_ptCharged.clear();
+      m_etaCharged.clear();
+      m_phiCharged.clear();
+      m_mCharged.clear();
+
+      m_ptPi0.clear();
+      m_etaPi0.clear();
+      m_phiPi0.clear();
+      m_mPi0.clear();
+
+      m_nPi0s.clear();
 
       const xAOD::TauJetContainer* tau_cont = nullptr;
       CHECK(evtStore()->retrieve(tau_cont, "TauJets"));
@@ -1025,6 +1049,35 @@ StatusCode MLTreeMaker::execute() {
 
 
 
+     // decorate the reco charged 4-momenum information to tau
+     xAOD::IParticle::FourMom_t p4Charged; 
+     for(auto track : recoTau->tracks()) p4Charged += track->p4();
+     recoTau->auxdecor<double>("ptCharged")  = p4Charged.Pt(); 
+     recoTau->auxdecor<double>("etaCharged") = p4Charged.Eta(); 
+     recoTau->auxdecor<double>("phiCharged") = p4Charged.Phi(); 
+     recoTau->auxdecor<double>("mCharged")   = p4Charged.M(); 
+    
+     m_ptCharged.push_back(recoTau->auxdecor<double>("ptCharged")/1e3);
+     m_etaCharged.push_back(recoTau->auxdecor<double>("etaCharged"));
+     m_phiCharged.push_back(recoTau->auxdecor<double>("phiCharged"));
+     m_mCharged.push_back(recoTau->auxdecor<double>("mCharged")/1e3);
+
+     // decorate the reco pi0 4-momenum information to tau
+     xAOD::IParticle::FourMom_t p4Pi0; 
+     for( auto pfo : recoTau->pi0PFOLinks() )
+        p4Pi0 += (*pfo)->p4();
+     recoTau->auxdecor<double>("ptPi0")  = p4Pi0.Pt(); 
+     recoTau->auxdecor<double>("etaPi0") = p4Pi0.Eta(); 
+     recoTau->auxdecor<double>("phiPi0") = p4Pi0.Phi(); 
+     recoTau->auxdecor<double>("mPi0")   = p4Pi0.M(); 
+     
+     m_ptPi0.push_back(recoTau->auxdecor<double>("ptPi0")/1e3);
+     m_etaPi0.push_back(recoTau->auxdecor<double>("etaPi0"));
+     m_phiPi0.push_back(recoTau->auxdecor<double>("phiPi0"));
+     m_mPi0.push_back(recoTau->auxdecor<double>("mPi0")/1e3);
+
+     recoTau->auxdecor<int>("nPi0PFO") = recoTau->nPi0s();
+     m_nPi0s.push_back(recoTau->auxdecor<int>("nPi0PFO"));
 
        } // end if pass selection
       } // end for loop 
@@ -1636,7 +1689,7 @@ StatusCode MLTreeMaker::execute() {
         const CaloCell* cell = (*it_cell);
         if (!cell->caloDDE()) continue;
       
-        double dEta_before = cell->eta() - centerCellEta;
+        
 
         if(applyCellCorrection){
         CaloVertexedCell vxCell (*cell, (*recoTau->vertexLink())->position());

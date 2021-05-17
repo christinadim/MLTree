@@ -1,0 +1,8 @@
+{
+  "inDSs": [
+    "group.perf-tau.mc16_13TeV.425200.Pythia8EvtGen_A14NNPDF23LO_Gammatautau_MassWeight.merge.AOD.e5468_e5984_s3126_r11153_r11154_der1614884382"
+  ],
+  "outDSs": [
+    "Gammatautau_MassWeight.merge.AOD.e5468_e5984_s3126_r11153_r11154.images_v1"
+  ]
+}     
