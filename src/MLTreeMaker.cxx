@@ -1387,40 +1387,7 @@ StatusCode MLTreeMaker::execute() {
 
   } // closes if(m_doEventTree)
 
-  // Calo clusters
-//  const xAOD::CaloClusterContainer* clusterContainer = 0; 
-//  CHECK(evtStore()->retrieve(clusterContainer, m_caloClusterContainerName));
-  //first sort the clusters by energy
-  //fill a (multi)map with key = energy and value = index of cluster in list
-//  std::multimap<float,unsigned int,std::greater<float> > clusterRanks;
-/*
-  for (unsigned int iCluster=0; iCluster < clusterContainer->size(); iCluster++)
-  {
-    auto calibratedCluster=(*clusterContainer)[iCluster];
-    auto cluster=calibratedCluster;
-    if(m_doUncalibratedClusters) 
-    {
-      auto sisterCluster=calibratedCluster->getSisterCluster();
-      if(sisterCluster) cluster=sisterCluster;
-      else 
-      {
-	ATH_MSG_ERROR("Sister cluster returns nullptr");
-	return StatusCode::FAILURE;
-      }
-    }
-    float clusterE = cluster->e()/1e3;
-    float clusterEta = cluster->eta();
-    if (clusterE < m_clusterE_min || 
-        clusterE > m_clusterE_max || 
-        std::abs(clusterEta) > m_clusterEtaAbs_max) continue;
-
-    clusterRanks.emplace_hint(clusterRanks.end(),clusterE,iCluster);
-  } */ 
- // m_nCluster = clusterRanks.size();
-  //loop over clusters in order of their energies
-  //clusters failing E or eta cut are not included in loop
-
-  // Comment everything above, loop over taus and then loop over clusters of its tau 
+  // insteaf of retrieveing all Calo clusters, loop over taus and then loop over clusters of its tau 
   const xAOD::TauJetContainer* tau_cont = nullptr;
   CHECK(evtStore()->retrieve(tau_cont, "TauJets"));
   for(const xAOD::TauJet* recoTau: *tau_cont){
@@ -1438,17 +1405,10 @@ StatusCode MLTreeMaker::execute() {
   // so that we only have truth-matched reco-taus
   if(pass_selection){
 
-  //unsigned int jCluster=0;
-
-  //for(auto mpair : clusterRanks)
-
 
    for (unsigned int jCluster=0; jCluster< recoTau->nClusters(); jCluster++)
    {
-    //auto calibratedCluster=(*clusterContainer)[mpair.second];
-    //auto cluster=calibratedCluster;
-    //if(m_doUncalibratedClusters) cluster=calibratedCluster->getSisterCluster();
-  
+     
     const xAOD::IParticle* particle  = recoTau->cluster(jCluster);
     const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>(particle);
 
